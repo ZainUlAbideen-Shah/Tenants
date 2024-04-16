@@ -1,9 +1,10 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useRef, useState, useEffect } from 'react';
-import { getDownloadURL, getStorage, ref, uploadBytes, uploadBytesResumable } from 'firebase/storage';
+import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage';
 
 import { app } from '../firebase';
+import { updateUserStart, updateUserSuccess, updateUserFailure } from '../store/userSlice';
 
 function Profile() {
 
@@ -13,6 +14,8 @@ function Profile() {
   const [uploadPerc, setUploadperc] = useState(0);
   const [uploadError, setUploadError] = useState(false);
   const [formData, setFormData] = useState({});
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (file) {
@@ -42,12 +45,39 @@ function Profile() {
     )
   };
 
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.id]: e.target.value })
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      dispatch(updateUserStart());
+      const res = await fetch(`/user/update/${currentUser._id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      });
+      console.log(res)
+      const data = await res.json();
+      if (data.success === false) {
+        dispatch(updateUserFailure(data.message))
+        return
+      }
+      dispatch(updateUserSuccess(data));
+    } catch (error) {
+      dispatch(updateUserFailure(error.message))
+    }
+  };
+
   return (
     <div className='p-3 max-w-lg mx-auto'>
       <h1 className='text-3xl font-semibold text-center my-7'>
         Profile
       </h1>
-      <form className='flex flex-col gap-4' >
+      <form className='flex flex-col gap-4' onSubmit={handleSubmit}>
         <input onChange={(e) => setFile(e.target.files[0])} type="file" ref={fileRef} hidden accept='image/*' />
         <img onClick={() => fileRef.current.click()} src={formData.avatar || currentUser.avatar} alt="profile" className='rounded-full h-24 w-24 object-cover cursor-pointer self-center mt-2' />
         <p className='text-sm self-center'>
@@ -55,9 +85,9 @@ function Profile() {
             {`Uploading ${uploadPerc}%`}
           </span>) : uploadPerc === 100 ? (<span className='text-green-700'>Image succesfully uploaded!</span>) : ('')}
         </p>
-        <input type='text' placeholder='Username' className='border p-3 rounded-lg' id='username'></input>
-        <input type='email' placeholder='Email' className='border p-3 rounded-lg' id='email'></input>
-        <input type='password' placeholder='Password' className='border p-3 rounded-lg' id='password'></input>
+        <input type='text' placeholder='Username' className='border p-3 rounded-lg' id='username' defaultValue={currentUser.username} onChange={handleChange}></input>
+        <input type='email' placeholder='Email' className='border p-3 rounded-lg' id='email' defaultValue={currentUser.email} onChange={handleChange}></input>
+        <input type='password' placeholder='Password' className='border p-3 rounded-lg' id='password' onChange={handleChange}></input>
         <button className='bg-slate-700 text-white rounded-lg p-3 uppercase hover:opacity-95 disabled:placeholder-opacity-80'>Update</button>
       </form>
       <div className='flex justify-between mt-5'>
