@@ -94,7 +94,6 @@ function Profile() {
     try {
       dispatch(signoutStart());
       const res = await fetch('/api/auth/signout');
-      console.log(res)
       const data = await res.json();
       if (data.success === false) {
         dispatch(signoutFailure(data.message));
