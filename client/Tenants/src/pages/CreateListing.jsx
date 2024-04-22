@@ -128,6 +128,7 @@ export default function CreateListing() {
                 }),
             });
             const data = await res.json();
+            console.log(data.success);
             setLoading(false);
             if (data.success === false) {
                 setError(data.message)
