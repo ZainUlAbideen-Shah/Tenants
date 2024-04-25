@@ -7,6 +7,8 @@ import "swiper/css/bundle";
 import { useSelector } from "react-redux";
 import { FaBath, FaBed, FaChair, FaMapMarkedAlt, FaMapMarkerAlt, FaParking, FaShare } from 'react-icons/fa';
 
+import Contact from "../components/Contact";
+
 export default function Listing() {
 
     const { currentUser } = useSelector((state) => state.user);
@@ -112,6 +114,10 @@ export default function Listing() {
                                 {listing.furnished ? 'Furnished' : 'Not Furnished'}
                             </li>
                         </ul>
+                        {currentUser && !contact && listing.userRef !== currentUser._id && (
+                            <button onClick={() => setContact(true)} className="bg-slate-700 text-white rounded-lg uppercase hover:opacity-95 p-3">Contact Landlord</button>
+                        )}
+                        {contact && <Contact listing={listing} />}
                     </div>
                 </>
             )}
