@@ -12,8 +12,7 @@ import listingRouter from './routes/listing.js';
 
 dotenv.config();
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.resolve(__filename);
+const __dirname = path.resolve();
 
 const app = express();
 
