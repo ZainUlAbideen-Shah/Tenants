@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 import userRouter from './routes/user.js';
 import authRouter from './routes/auth.js';
@@ -11,7 +12,8 @@ import listingRouter from './routes/listing.js';
 
 dotenv.config();
 
-const __dirname = path.resolve();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.resolve(__filename);
 
 const app = express();
 
@@ -37,6 +39,10 @@ app.use('/api/user', userRouter);
 app.use('/api/listing', listingRouter);
 
 app.use(express.static(path.join(__dirname, '/client/tenants/dist')));
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '/client/tenants/dist/index.html'))
+});
+
 
 app.use((err, req, res, next) => {
     const statusCode = err.statusCode || 500;
